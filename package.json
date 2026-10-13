@@ -1,0 +1,1 @@
+{"name":"studio-qa-hello-world","private":true,"type":"module","scripts":{"start":"node main.mjs"}}
