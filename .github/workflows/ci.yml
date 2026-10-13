@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  greeting:
+    name: Greeting syntax and output
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check syntax
+        run: node --check main.mjs
+      - name: Verify exact stdout and exit code
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { spawnSync } from 'node:child_process';
+
+          const result = spawnSync(process.execPath, ['main.mjs']);
+          assert.ifError(result.error);
+          assert.deepEqual(result.stdout, Buffer.from('Hello World 4\n'));
+          assert.equal(result.status, 0);
+          console.log('Passed: exact stdout Hello World 4 + LF; exit code 0');
+          NODE
